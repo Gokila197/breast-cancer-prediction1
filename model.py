@@ -1,4 +1,3 @@
-# File: app.py
 import pandas as pd
 import numpy as np
 import streamlit as st
@@ -6,40 +5,42 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
-# Load the dataset
+# App title
 st.title("Breast Cancer Diagnosis Prediction")
 
-st.sidebar.header("D:\breast cancer prediction\BreastCancer.csv")
-uploaded_file = st.sidebar.file_uploader("D:\breast cancer prediction\BreastCancer.csv", type=["csv"])
-if uploaded_file is not None:
-    data = pd.read_csv("D:\breast cancer prediction\BreastCancer.csv")
+# Local dataset path
+dataset_path = "D:/breast cancer prediction/BreastCancer.csv"
+
+try:
+    # Read dataset
+    data = pd.read_csv(dataset_path)
     st.write("Dataset Preview:")
     st.write(data.head())
 
-    # Check for target column
+    # Validate dataset
     if 'diagnosis' not in data.columns:
         st.error("The dataset must contain a 'diagnosis' column!")
     else:
-        # Encode diagnosis column
+        # Encode target column
         data['diagnosis'] = data['diagnosis'].apply(lambda x: 1 if x == 'M' else 0)  # Malignant=1, Benign=0
 
         # Feature selection
         X = data.drop(columns=['diagnosis'])
         y = data['diagnosis']
 
-        # Split the data
+        # Split dataset
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-        # Train a Random Forest Classifier
+        # Train Random Forest Classifier
         model = RandomForestClassifier(random_state=42)
         model.fit(X_train, y_train)
 
-        # Predictions
+        # Evaluate model
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
         st.write(f"Model Accuracy: {accuracy:.2f}")
 
-        # Allow user input for predictions
+        # User input for predictions
         st.subheader("Make a Prediction")
         user_input = {}
         for col in X.columns:
@@ -49,7 +50,5 @@ if uploaded_file is not None:
         prediction = model.predict(user_input_df)
         prediction_result = "Malignant" if prediction[0] == 1 else "Benign"
         st.write(f"Prediction: {prediction_result}")
-
-# If no file is uploaded
-else:
-    st.write("Please upload a CSV file to proceed.")
+except Exception as e:
+    st.error(f"Error processing the file: {e}")
