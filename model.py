@@ -12,7 +12,7 @@ st.title("Breast Cancer Diagnosis Prediction")
 st.sidebar.header("D:\breast cancer prediction\BreastCancer.csv")
 uploaded_file = st.sidebar.file_uploader("D:\breast cancer prediction\BreastCancer.csv", type=["csv"])
 if uploaded_file is not None:
-    data = pd.read_csv(uploaded_file)
+    data = pd.read_csv("D:\breast cancer prediction\BreastCancer.csv")
     st.write("Dataset Preview:")
     st.write(data.head())
 
