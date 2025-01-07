@@ -9,8 +9,8 @@ from sklearn.metrics import accuracy_score
 # Load the dataset
 st.title("Breast Cancer Diagnosis Prediction")
 
-st.sidebar.header("Upload CSV")
-uploaded_file = st.sidebar.file_uploader("Upload your CSV file", type=["csv"])
+st.sidebar.header("D:\breast cancer prediction\BreastCancer.csv")
+uploaded_file = st.sidebar.file_uploader("D:\breast cancer prediction\BreastCancer.csv", type=["csv"])
 if uploaded_file is not None:
     data = pd.read_csv(uploaded_file)
     st.write("Dataset Preview:")
