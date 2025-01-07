@@ -1,63 +1,55 @@
-# model.py
+# File: app.py
 import pandas as pd
+import numpy as np
 import streamlit as st
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
-# Set the title of the application
+# Load the dataset
 st.title("Breast Cancer Diagnosis Prediction")
 
-# Sidebar for CSV file upload
-st.sidebar.header("D:\breast cancer prediction\BreastCancer.csv")
-uploaded_file = st.sidebar.file_uploader("D:\breast cancer prediction\BreastCancer.csv", type=["csv"])
-
+st.sidebar.header("Upload CSV")
+uploaded_file = st.sidebar.file_uploader("Upload your CSV file", type=["csv"])
 if uploaded_file is not None:
-    # Load the dataset
-    data = pd.read_csv("D:\breast cancer prediction\BreastCancer.csv")
-    st.subheader("Dataset Overview")
+    data = pd.read_csv(uploaded_file)
+    st.write("Dataset Preview:")
     st.write(data.head())
 
-    # Validate the dataset
+    # Check for target column
     if 'diagnosis' not in data.columns:
         st.error("The dataset must contain a 'diagnosis' column!")
     else:
-        st.success("Dataset successfully loaded!")
-        # Encode the 'diagnosis' column
-        data['diagnosis'] = data['diagnosis'].map({'M': 1, 'B': 0})  # Malignant=1, Benign=0
+        # Encode diagnosis column
+        data['diagnosis'] = data['diagnosis'].apply(lambda x: 1 if x == 'M' else 0)  # Malignant=1, Benign=0
 
-        # Split features and target
+        # Feature selection
         X = data.drop(columns=['diagnosis'])
         y = data['diagnosis']
 
-        # Split into training and testing sets
+        # Split the data
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-        # Train the model
+        # Train a Random Forest Classifier
         model = RandomForestClassifier(random_state=42)
         model.fit(X_train, y_train)
 
-        # Evaluate the model
+        # Predictions
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
         st.write(f"Model Accuracy: {accuracy:.2f}")
 
-        # Section for user input
-        st.subheader("Make a Diagnosis Prediction")
-        st.write("Enter values for the following features:")
+        # Allow user input for predictions
+        st.subheader("Make a Prediction")
+        user_input = {}
+        for col in X.columns:
+            user_input[col] = st.number_input(f"Enter value for {col}", float(X[col].min()), float(X[col].max()))
 
-        # Dynamically create input fields based on feature names
-        user_data = {col: st.number_input(f"{col}", float(X[col].min()), float(X[col].max())) for col in X.columns}
-        user_data_df = pd.DataFrame([user_data])
+        user_input_df = pd.DataFrame([user_input])
+        prediction = model.predict(user_input_df)
+        prediction_result = "Malignant" if prediction[0] == 1 else "Benign"
+        st.write(f"Prediction: {prediction_result}")
 
-        # Predict and display the result
-        if st.button("Predict"):
-            prediction = model.predict(user_data_df)[0]
-            result = "Malignant" if prediction == 1 else "Benign"
-            st.write(f"The predicted diagnosis is: **{result}**")
+# If no file is uploaded
 else:
-    st.info("Please upload a CSV file to get started.")
-
-# Footer
-st.write("---")
-st.write("Developed with ❤️ using Streamlit")
+    st.write("Please upload a CSV file to proceed.")
